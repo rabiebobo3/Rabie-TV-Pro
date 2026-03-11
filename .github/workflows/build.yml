@@ -1,42 +1,26 @@
-name: Build Rabie TV APK
+name: Build APK
 on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
       - name: setup JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-
-      - name: Create Android Structure
+      - name: Run Build
         run: |
-          # إنشاء المجلدات الرسمية
+          # إنشاء الهيكل الصحيح آلياً
           mkdir -p app/src/main/java/com/rtv/tv
-          mkdir -p app/src/main/res/layout
-          mkdir -p app/src/main/res/values
-          
-          # نقل ملفاتك إلى أماكنها الصحيحة آلياً
           [ -f MainActivity.java ] && cp MainActivity.java app/src/main/java/com/rtv/tv/
-          [ -f AndroidManifest.xml ] && cp AndroidManifest.xml app/src/main/
-          cp *.xml app/src/main/res/layout/ 2>/dev/null || true
-          [ -f strings.xml ] && mv app/src/main/res/layout/strings.xml app/src/main/res/values/ 2>/dev/null || true
-          
-          # إعداد ملفات Gradle الأساسية
           echo "include ':app'" > settings.gradle
-          [ -f build.gradle ] && cp build.gradle app/
-          
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-
-      - name: Build APK
-        run: gradle :app:assembleDebug --stacktrace
-
-      - name: Upload APK
+          # تشغيل البناء مباشرة بدون كاش
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: Rabie-TV-Pro-Final
-          path: "**/*.apk"
+          name: Rabie-TV-Pro
+          path: app/build/outputs/apk/debug/*.apk
