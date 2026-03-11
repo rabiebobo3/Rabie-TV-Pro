@@ -10,10 +10,17 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+      - name: Fix Project Structure
+        run: |
+          mkdir -p app/src/main/res/layout
+          mkdir -p app/src/main/java/com/rabie/tv
+          mv *.xml app/src/main/res/layout/ 2>/dev/null || true
+          mv AndroidManifest.xml app/src/main/ 2>/dev/null || true
+          mv *.java app/src/main/java/com/rabie/tv/ 2>/dev/null || true
       - name: Grant Permission
         run: chmod +x gradlew
       - name: Build with Gradle
-        run: ./gradlew assembleDebug --no-daemon
+        run: ./gradlew assembleDebug --stacktrace
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
