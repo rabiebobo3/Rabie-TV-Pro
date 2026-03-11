@@ -1,28 +1,37 @@
-name: Build APK
+name: Build Rabie TV Final
 on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
       - name: set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Fix Project Structure
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: 8.0
+
+      - name: Auto-Organize Files
         run: |
-          mkdir -p app/src/main/res/layout
           mkdir -p app/src/main/java/com/rabie/tv
-          mv *.xml app/src/main/res/layout/ 2>/dev/null || true
-          mv AndroidManifest.xml app/src/main/ 2>/dev/null || true
-          mv *.java app/src/main/java/com/rabie/tv/ 2>/dev/null || true
-      - name: Grant Permission
-        run: chmod +x gradlew
-      - name: Build with Gradle
-        run: ./gradlew assembleDebug --stacktrace
-      - name: Upload APK
+          mkdir -p app/src/main/res/layout
+          mkdir -p app/src/main/res/values
+          cp MainActivity.java app/src/main/java/com/rabie/tv/ 2>/dev/null || true
+          cp *.xml app/src/main/res/layout/ 2>/dev/null || true
+          mv app/src/main/res/layout/AndroidManifest.xml app/src/main/ 2>/dev/null || true
+          mv app/src/main/res/layout/strings.xml app/src/main/res/values/ 2>/dev/null || true
+
+      - name: Build APK
+        run: gradle assembleDebug --stacktrace
+
+      - name: Upload Rabie TV APK
         uses: actions/upload-artifact@v4
         with:
-          name: Rabie-TV-Pro-APK
+          name: Rabie-TV-Pro-App
           path: "**/*.apk"
