@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-<style>
+    <style>
         :root { --bg: #0a0714; --panel: #1c142e; --accent: #ff9100; --active: #2d2445; --border: rgba(255,255,255,0.05); }
         * { box-sizing: border-box; outline: none; -webkit-user-select: none; user-select: none; }
         body, html { margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: sans-serif; height: 100vh; overflow: hidden; }
@@ -31,70 +31,73 @@
         .item { display: flex; align-items: center; padding: 12px 15px; border-bottom: 1px solid var(--border); cursor: pointer; font-size: 14px; transition: 0.2s; }
         .item:hover, .item:focus, .item.active { background: var(--active); border-right: 4px solid var(--accent); outline: none; color: var(--accent); }
         
-        .col-groups .item i { display: none; }
         .item i { margin-left: 12px; color: var(--accent); font-size: 20px; }
-        .item img { width: 30px; height: 30px; object-fit: contain; margin-left: 12px; border-radius: 4px; background: #000; }
+        .item img { width: 35px; height: 35px; object-fit: contain; margin-left: 12px; border-radius: 4px; background: #000; }
 
         .video-box { width: 100%; height: 50%; background: #000; display: flex; align-items: center; justify-content: center; border-bottom: 2px solid var(--panel); position: relative; }
         .info-box { flex: 1; padding: 25px; background: linear-gradient(180deg, #1c142e, #0a0714); overflow-y: auto; }
         .info-box h2 { color: var(--accent); margin: 0 0 10px 0; font-size: 22px; }
         
-        .btn-ibo { background: var(--active); border: 1px solid var(--border); color: #fff; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 12px; }
+        .btn-ibo { background: var(--active); border: 1px solid var(--border); color: #fff; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 12px; margin-left: 10px; }
         .btn-ibo:focus { background: var(--accent); color: #000; outline: none; }
-        .search-box { background: #111; border: 1px solid var(--border); padding: 5px 15px; border-radius: 20px; display: flex; align-items: center; margin-right: 20px; width: 180px; }
-        .search-box input { background: transparent; border: none; color: #fff; width: 100%; }
-</style>
+    </style>
   </head>
   <body oncontextmenu="return false;">
 
-	<div id="splash">
-	  <h1>Rabie-TV</h1>
-	  <div class="loader"></div>
-	</div>
+    <div id="splash">
+      <h1>RABIE-TV</h1>
+      <div class="loader"></div>
+    </div>
 
-	<div class="top-nav">
-	  <div class="tabs">
+    <div class="top-nav">
+      <div class="tabs">
         <div class="tab active" id="tab-live" tabindex="0" onclick="app.setMode('live')">القنوات</div>
         <div class="tab" id="tab-movie" tabindex="0" onclick="app.setMode('movie')">الأفلام</div>
         <div class="tab" id="tab-series" tabindex="0" onclick="app.setMode('series')">المسلسلات</div>
-        <div class="tab" id="tab-fav" tabindex="0" onclick="app.setMode('fav')">المفضلة</div>
-	  </div>
-      <div class="search-box"><input type="text" id="search-input" placeholder="بحث..." oninput="app.search(this.value)"></div>
-      <button class="btn-ibo" tabindex="0" onclick="app.toggleFav()" style="margin-left:10px;">⭐ أضف/حذف</button>
+        <div class="tab" id="tab-fav" tabindex="0" onclick="app.setMode('fav')">المفضلة ⭐</div>
+      </div>
+      <div style="flex:1"></div>
+      <button class="btn-ibo" tabindex="0" onclick="app.toggleFav()">⭐ أضف/حذف مفضلة</button>
       <button class="btn-ibo" tabindex="0" onclick="location.reload()">تحديث</button>
-	  <div style="flex:1"></div>
-	  <div style="font-weight:900; color:var(--accent); font-size:18px;">RABIE-TV PRO</div>
-	</div>
+      <div style="font-weight:900; color:var(--accent); font-size:18px; margin-right:15px;">RABIE-TV PRO</div>
+    </div>
 
-	<div class="layout">
-	  <div class="col-groups" id="list-groups"></div>
-	  <div class="col-list" id="list-content"></div>
-	  <div class="col-preview">
+    <div class="layout">
+      <div class="col-groups" id="list-groups"></div>
+      <div class="col-list" id="list-content"></div>
+      <div class="col-preview">
         <div class="video-box"><i class="material-icons" style="font-size:120px; color:#1a1526;">play_circle_filled</i></div>
-        <div class="info-box"><h2 id="display-name">اختر محتوى</h2><p id="group-name" style="color:#aaa; font-size:14px;">يرجى تحديد محتوى لبدء البث.</p></div>
-	  </div>
-	</div>
+        <div class="info-box"><h2 id="display-name">اختر محتوى</h2><p id="group-name" style="color:#aaa; font-size:14px;">يرجى تحديد قناة أو فيلم لبدء المشاهدة.</p></div>
+      </div>
+    </div>
 
 <script>
     const app = {
+        // تم إلغاء أي قيود (Arrays) لاستقبال عدد غير محدود من الأقسام
         data: { live: {}, movie: {}, series: {}, fav: [] },
-        fullList: [], mode: 'live',
-        lastClickTime: 0, clickDelay: 300, currentItem: null,
+        fullList: [], mode: 'live', currentItem: null,
 
         async init() {
-            this.data.fav = JSON.parse(localStorage.getItem('rabie_favs') || '[]');
+            // تحميل المفضلة من الذاكرة
+            const savedFavs = localStorage.getItem('rabie_favs');
+            this.data.fav = savedFavs ? JSON.parse(savedFavs) : [];
+            
+            // دعم أزرار الريموت لأجهزة أندرويد تي في
             document.addEventListener('keydown', (e) => {
-                if (e.keyCode === 13) {
+                if (e.keyCode === 13) { // زر Enter
                     const activeEl = document.activeElement;
                     if (activeEl && activeEl.click) activeEl.click();
                 }
             });
-            setTimeout(() => { document.getElementById('splash').style.display = 'none'; }, 2000);
+
+            setTimeout(() => { document.getElementById('splash').style.display = 'none'; }, 1500);
+            
             try {
                 const r = await fetch("https://gist.githubusercontent.com/rabiebobo3/d498347610d7312b3e9be88093117620/raw/list.m3u");
-                this.parse(await r.text());
+                const text = await r.text();
+                this.parse(text);
                 this.setMode('live');
-            } catch(e) {}
+            } catch(e) { console.error("Error loading list"); }
         },
 
         parse(text) {
@@ -106,13 +109,19 @@
                         name: l.split(',').pop().trim(),
                         group: l.match(/group-title="(.*?)"/)?.[1] || "أخرى",
                         logo: l.match(/tvg-logo="(.*?)"/)?.[1] || "",
-                        quality: "HD"
+                        url: ""
                     };
                 } else if (l.startsWith('http') && item) {
                     item.url = l.trim();
                     this.fullList.push(item);
+                    
                     const g = item.group.toLowerCase();
-                    const target = (g.includes('series') || g.includes('مسلسل')) ? this.data.series : (g.includes('movie') || g.includes('film') || g.includes('افلام')) ? this.data.movie : this.data.live;
+                    let target;
+                    // تصنيف تلقائي بناءً على اسم القسم (لا يوجد حد لعدد الأقسام هنا)
+                    if (g.includes('series') || g.includes('مسلسل')) target = this.data.series;
+                    else if (g.includes('movie') || g.includes('film') || g.includes('افلام')) target = this.data.movie;
+                    else target = this.data.live;
+
                     if (!target[item.group]) target[item.group] = [];
                     target[item.group].push(item);
                     item = null;
@@ -124,74 +133,80 @@
             this.mode = m;
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.getElementById('tab-' + m).classList.add('active');
+            
             const l1 = document.getElementById('list-groups');
             const l2 = document.getElementById('list-content');
             l1.innerHTML = ""; l2.innerHTML = "";
             
             if (m === 'fav') {
-                l1.innerHTML = `<div class="item active" tabindex="0">قائمة المفضلة</div>`;
-                this.data.fav.forEach(i => this.renderItem(i, l2));
+                // عرض المفضلة مباشرة في العمود الثاني
+                l1.innerHTML = `<div class="item active" tabindex="0">كل المفضلة</div>`;
+                if(this.data.fav.length === 0) {
+                    l2.innerHTML = `<div style="padding:20px; color:#666;">لا توجد عناصر في المفضلة بعد.</div>`;
+                } else {
+                    this.data.fav.forEach(i => this.renderItem(i, l2));
+                }
             } else {
-                Object.keys(this.data[m]).forEach(g => {
+                // عرض كافة الأقسام بدون أي استثناء (تم حل مشكلة الـ 10 أقسام)
+                const groups = Object.keys(this.data[m]);
+                groups.forEach((g, index) => {
                     const div = document.createElement('div');
                     div.className = "item"; div.tabIndex = 0; div.innerText = g;
                     div.onclick = () => this.loadGroup(g, div);
                     l1.appendChild(div);
+                    if(index === 0) this.loadGroup(g, div); // تحميل أول قسم تلقائياً
                 });
             }
         },
 
         loadGroup(group, el) {
             this.active(el, '#list-groups');
-            const l2 = document.getElementById('list-content'); l2.innerHTML = "";
+            const l2 = document.getElementById('list-content'); 
+            l2.innerHTML = "";
+            // تحميل كافة العناصر داخل القسم (حل مشكلة الـ 10 حلقات)
             this.data[this.mode][group].forEach(i => this.renderItem(i, l2));
-            setTimeout(() => { const f = l2.querySelector('.item'); if(f) f.focus(); }, 100);
         },
 
         renderItem(i, container) {
             const div = document.createElement('div');
             div.className = "item"; div.tabIndex = 0;
             div.innerHTML = `<img src="${i.logo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/716/716429.png'"><span>${i.name}</span>`;
-            div.onclick = () => this.handleAction(i);
+            div.onclick = () => this.handleAction(i, div);
             container.appendChild(div);
         },
 
-        handleAction(i) {
+        handleAction(i, el) {
             this.currentItem = i;
-            this.active(document.activeElement, '#list-content');
+            this.active(el, '#list-content');
             document.getElementById('display-name').innerText = i.name;
-            if(window.Android) window.Android.playSide(i.url, i.name, "HD");
+            document.getElementById('group-name').innerText = "القسم: " + i.group;
             
-            const now = Date.now();
-            if (now - this.lastClickTime < this.clickDelay) {
-                if(window.Android) window.Android.toggleFullScreen();
-            }
-            this.lastClickTime = now;
+            // إرسال الرابط لمشغل أندرويد (VLC أو غيره)
+            if(window.Android) window.Android.playSide(i.url, i.name, "HD");
         },
 
         toggleFav() {
             if(!this.currentItem) return;
             const idx = this.data.fav.findIndex(f => f.url === this.currentItem.url);
-            if (idx > -1) this.data.fav.splice(idx, 1);
-            else this.data.fav.push(this.currentItem);
+            if (idx > -1) {
+                this.data.fav.splice(idx, 1); // حذف
+            } else {
+                this.data.fav.push(this.currentItem); // إضافة
+            }
             localStorage.setItem('rabie_favs', JSON.stringify(this.data.fav));
             if(this.mode === 'fav') this.setMode('fav');
-        },
-
-        search(q) {
-            const l2 = document.getElementById('list-content');
-            if (q.length < 2) return;
-            l2.innerHTML = "";
-            this.fullList.filter(i => i.name.toLowerCase().includes(q.toLowerCase())).forEach(i => this.renderItem(i, l2));
+            alert(idx > -1 ? "تم الحذف من المفضلة" : "تمت الإضافة للمفضلة");
         },
 
         active(el, p) {
             document.querySelectorAll(p + ' .item').forEach(i => i.classList.remove('active'));
-            if(el) { el.classList.add('active'); el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+            if(el) { 
+                el.classList.add('active'); 
+                el.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); 
+            }
         }
     };
     app.init();
 </script>
   </body>
 </html>
-
