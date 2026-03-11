@@ -15,20 +15,22 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: 8.5 # تم التصحيح هنا لضمان وجود الإصدار
+          gradle-version: 8.5
 
       - name: Auto-Organize Files
         run: |
           mkdir -p app/src/main/java/com/rabie/tv
           mkdir -p app/src/main/res/layout
           mkdir -p app/src/main/res/values
+          # نسخ الملفات مع تجاهل الأخطاء
           cp MainActivity.java app/src/main/java/com/rabie/tv/ 2>/dev/null || true
           cp *.xml app/src/main/res/layout/ 2>/dev/null || true
-          mv app/src/main/res/layout/AndroidManifest.xml app/src/main/ 2>/dev/null || true
-          mv app/src/main/res/layout/strings.xml app/src/main/res/values/ 2>/dev/null || true
+          [ -f app/src/main/res/layout/AndroidManifest.xml ] && mv app/src/main/res/layout/AndroidManifest.xml app/src/main/ || true
+          [ -f app/src/main/res/layout/strings.xml ] && mv app/src/main/res/layout/strings.xml app/src/main/res/values/ || true
 
-      - name: Build APK
-        run: gradle assembleDebug --stacktrace
+      - name: Build APK (Ignore Minor Errors)
+        # أضفنا أمر التنظيف أولاً ثم البناء
+        run: gradle clean assembleDebug --stacktrace
 
       - name: Upload Rabie TV APK
         uses: actions/upload-artifact@v4
