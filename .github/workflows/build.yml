@@ -10,13 +10,26 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Build
+
+      - name: Fix Project Structure
         run: |
           mkdir -p app/src/main/java/com/rtv/tv
           mkdir -p app/src/main/res/layout
+          # نقل الملفات لأماكنها الصحيحة آلياً
           cp MainActivity.java app/src/main/java/com/rtv/tv/ 2>/dev/null || true
           cp *.xml app/src/main/res/layout/ 2>/dev/null || true
-          gradle assembleDebug
+          # إنشاء ملف settings.gradle ليعرف المصنع أن هناك تطبيقاً اسمه app
+          echo "include ':app'" > settings.gradle
+          # نقل ملف الجرادل إلى داخل مجلد app
+          mkdir -p app
+          cp build.gradle app/ 2>/dev/null || true
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build APK
+        run: gradle :app:assembleDebug
+        
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
