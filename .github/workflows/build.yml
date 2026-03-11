@@ -11,14 +11,26 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Accept Licenses & Build
+      - name: Build with Gradle
         run: |
-          # الموافقة على شروط أندرويد آلياً لكي لا يعلق
-          yes | sdkmanager --licenses || true
-          # بناء التطبيق مع تجاهل المشاكل التقنية القديمة
-          gradle assembleDebug --no-daemon
+          # 1. إنشاء الهيكل (كودك الممتاز)
+          mkdir -p app/src/main/java/com/rtv/tv
+          mkdir -p app/src/main/res/layout
+          mkdir -p app/src/main/res/values
           
-      - name: Upload
+          # 2. نقل الملفات (كودك الممتاز)
+          cp MainActivity.java app/src/main/java/com/rtv/tv/ 2>/dev/null || true
+          cp main.xml app/src/main/res/layout/ 2>/dev/null || true
+          cp AndroidManifest.xml app/src/main/ 2>/dev/null || true
+          
+          # 3. الربط (إضافة ملف الإعدادات لكي لا يتوه المصنع)
+          echo "include ':app'" > settings.gradle
+          cp build.gradle app/ 2>/dev/null || true
+
+          # 4. الأمر الصحيح للبناء (هنا التغيير الوحيد)
+          gradle :app:assembleDebug --no-daemon
+          
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Rabie-TV-Pro
