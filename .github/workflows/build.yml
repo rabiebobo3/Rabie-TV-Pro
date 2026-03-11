@@ -1,4 +1,4 @@
-name: Build Rabie TV Final
+name: Build Rabie TV Pro
 on: [push]
 jobs:
   build:
@@ -17,23 +17,29 @@ jobs:
         with:
           gradle-version: 8.5
 
-      - name: Auto-Organize Files
+      - name: Organize Project (com.rtv.tv)
         run: |
-          mkdir -p app/src/main/java/com/rabie/tv
+          # إنشاء المجلدات لتطابق الباكج نيم الخاص بك
+          mkdir -p app/src/main/java/com/rtv/tv
           mkdir -p app/src/main/res/layout
           mkdir -p app/src/main/res/values
-          # نسخ الملفات مع تجاهل الأخطاء
-          cp MainActivity.java app/src/main/java/com/rabie/tv/ 2>/dev/null || true
+          
+          # نقل ملف الجافا للمسار الصحيح
+          cp MainActivity.java app/src/main/java/com/rtv/tv/ 2>/dev/null || true
+          
+          # نقل ملفات التصميم
           cp *.xml app/src/main/res/layout/ 2>/dev/null || true
+          
+          # ترتيب المانيفست والقيم
           [ -f app/src/main/res/layout/AndroidManifest.xml ] && mv app/src/main/res/layout/AndroidManifest.xml app/src/main/ || true
           [ -f app/src/main/res/layout/strings.xml ] && mv app/src/main/res/layout/strings.xml app/src/main/res/values/ || true
+          [ -f app/src/main/res/layout/styles.xml ] && mv app/src/main/res/layout/styles.xml app/src/main/res/values/ || true
 
-      - name: Build APK (Ignore Minor Errors)
-        # أضفنا أمر التنظيف أولاً ثم البناء
+      - name: Build APK
         run: gradle clean assembleDebug --stacktrace
 
-      - name: Upload Rabie TV APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Rabie-TV-Pro-App
+          name: Rabie-TV-Pro-VLC
           path: "**/*.apk"
