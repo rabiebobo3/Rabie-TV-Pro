@@ -10,17 +10,24 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Run Build
+
+      - name: Build with Gradle
         run: |
-          # إنشاء الهيكل الصحيح آلياً
+          # إنشاء مجلدات المشروع آلياً
           mkdir -p app/src/main/java/com/rtv/tv
-          [ -f MainActivity.java ] && cp MainActivity.java app/src/main/java/com/rtv/tv/
-          echo "include ':app'" > settings.gradle
-          # تشغيل البناء مباشرة بدون كاش
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
-      - name: Upload
+          mkdir -p app/src/main/res/layout
+          mkdir -p app/src/main/res/values
+          
+          # ترتيب الملفات في أماكنها
+          cp MainActivity.java app/src/main/java/com/rtv/tv/ 2>/dev/null || true
+          cp main.xml app/src/main/res/layout/ 2>/dev/null || true
+          cp AndroidManifest.xml app/src/main/ 2>/dev/null || true
+          
+          # استخدام gradle العام بدلاً من gradlew المفقود
+          gradle assembleDebug
+          
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Rabie-TV-Pro
-          path: app/build/outputs/apk/debug/*.apk
+          path: "**/*.apk"
